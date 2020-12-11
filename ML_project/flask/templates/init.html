@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Deep Learning Prediction</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+  <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>  
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css" />
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="../static/js/FileSaver.js"></script>
+</head>
+
+<script type="text/javascript"charset="utf-8">
+
+
+if(location.search.indexOf('r') < 0){
+    var hash = window.location.hash;
+    var loc = window.location.href.replace(hash, '');
+    loc += (loc.indexOf('?') < 0? '?' : '&') + 'r';
+    setTimeout(function(){window.location.href = loc + hash;}, 5);
+}
+
+var dataset_name = location.href.split('=')[1].split('&')[0];
+var dataset = ""
+var i = 0
+
+history.pushState({}, null, location.href.split('&')[0]);
+
+  $(document).ready(function () {
+    $('#dtMaterialDesignExample').DataTable({
+      "searching": false,
+      "bPaginate": false,
+      "bLengthChange": false,
+      "bFilter": true,
+      "bInfo": false,
+      "targets": 'no-sort',
+      "bSort": false,
+      "order": []
+   });
+    //$('table').dataTable({searching: false, paging: false, info: false});
+  });
+
+  function insert_line(){
+    document.getElementById('insert-dts').style.display = ""
+    document.getElementById('insert_ln').style.display = "none"
+    document.getElementById('save_ln').style.display = ""
+    document.getElementById('delete_ln').style.display = ""
+    document.getElementById('save_dt').style.display = ""
+    document.getElementById('cookiesPopup').style.display = ""
+  }
+
+  function delete_line(){
+
+    console.log('Welcome to delete line')
+    document.getElementById('dtMaterialDesignExample').deleteRow(-1);
+
+  }
+
+  function save_file(){
+    console.log("welcome to save file")
+    var content = document.getElementById('dtMaterialDesignExample').innerHTML
+
+    parsed_content = content.split("</tr></tbody><tbody>").join('|\n').split('</th>').join(',').split('<th>').join('').split('<tr>').join('').split('<tbody><tr role="row" class="odd"><th class="sorting_1">').join('').split(',</tr></tbody>')[0].split(',|').join('')
+
+    console.log(parsed_content)
+
+    var blob = new Blob([parsed_content], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, "new_" + dataset_name);
+
+  }
+
+  function save_line(){
+    console.log("welcome to save line")
+
+    var d1 = document.getElementById('dtMaterialDesignExample');
+
+    if(document.getElementById('input1').value == "" || document.getElementById('input2').value == "" || document.getElementById('input3').value == "" || document.getElementById('input4').value == "" || document.getElementById('input5').value == "" || document.getElementById('input6').value == "" || document.getElementById('input7').value == "" || document.getElementById('input8').value == "") {
+      alert("Fill all the input box!");
+      return
+    }
+
+    /*
+    if(typeof document.getElementById('input1').value === "string" || typeof document.getElementById('input2').value === "string" || typeof document.getElementById('input3').value === "string" || typeof document.getElementById('input4').value === "string" || typeof document.getElementById('input5').value === "string" || typeof document.getElementById('input6').value === "string" || typeof document.getElementById('input7').value === "string" || typeof document.getElementById('input8').value === "string" || typeof document.getElementById('input9').value === "string") {
+      alert("Only integers and float are allows !");
+      return
+    }
+    */
+
+    var input1 = document.getElementById('input1').value
+    var input2 = document.getElementById('input2').value
+    var input3 = document.getElementById('input3').value
+    var input4 = document.getElementById('input4').value
+    var input5 = document.getElementById('input5').value
+    var input6 = document.getElementById('input6').value
+    var input7 = document.getElementById('input7').value
+    var input8 = document.getElementById('input8').value
+    var Nan = "NULL"
+    
+    var final_result = document.getElementById('input1').value + ',' + document.getElementById('input2').value +',' + document.getElementById('input3').value +',' + document.getElementById('input4').value +',' + document.getElementById('input5').value +',' + document.getElementById('input6').value +',' + document.getElementById('input7').value +',' + document.getElementById('input8').value
+
+    console.log('final result ====== ', final_result)
+
+
+    document.getElementById('n_line').value = final_result
+
+      d1.insertAdjacentHTML('beforeend', '<tr><th style="background-color:green">'+ input1 +'</th><th style="background-color:green">'+ input2 +'</th><th style="background-color:green">'+ input3 +'</th><th style="background-color:green">'+ input4 +'</th><th style="background-color:green">'+ input5 + '</th><th style="background-color:green">'+ input6 +'</th><th style="background-color:green">'+ input7 +'</th><th style="background-color:green">'+ input8 +'</th><th style="background-color:orange">'+ Nan +'</th><th></tr>');
+
+      document.getElementById('input1').value = ""
+      document.getElementById('input2').value = ""
+      document.getElementById('input3').value = ""
+      document.getElementById('input4').value = ""
+      document.getElementById('input5').value = ""
+      document.getElementById('input6').value = ""
+      document.getElementById('input7').value = ""
+      document.getElementById('input8').value = ""
+
+  }
+
+  function toFixed(x) {
+
+    num = parseFloat(x)
+
+    //console.log("avant ====" + num)
+
+    if (Math.abs(num) < 1.0) {
+      var e = parseInt(num.toString().split('e-')[1]);
+      if (e) {
+          num *= Math.pow(10,e-1);
+          num = '0.' + (new Array(e)).join('0') + num.toString().substring(2);
+      }
+    } else {
+      var e = parseInt(num.toString().split('+')[1]);
+      if (e > 20) {
+          e -= 20;
+          num /= Math.pow(10,e);
+          num += (new Array(e+1)).join('0');
+      }
+    }
+    return num;
+    //console.log("apres ====" + num)
+  }
+
+  function open_dataset(){
+
+    console.log(dataset_name)
+    window.document.getElementById("dataset_name").innerText = dataset_name;
+    window.document.getElementById("namer").value = dataset_name;
+
+    var unit = document.getElementById("dataset").innerHTML;
+    //var parts = unit.split(". ").join('').split("array(").join('').split(')').join('|').split("|,");
+    var parts = unit.split(". ").join('').split("array(").join('').split(')').join('').split("],").join('|').split('[').join('')
+    var tab = parts.split('|')
+
+    //console.log(tab[1])
+
+    document.getElementById("dataset").innerHTML = parts
+
+    var results = new Array([]);
+    var results2 = new Array([]);
+    console.log(tab.length)
+    for (var i = 0; i < tab.length; i++) {
+
+      var value = tab[i].split(",")
+
+      //console.log(value[6])
+
+      var a = toFixed(value[0])
+      var b = toFixed(value[1])
+      var c = toFixed(value[2])
+      var d = toFixed(value[3])
+      var e = toFixed(value[4])
+      var f = toFixed(value[5])
+      var g = Math.round(toFixed(value[6]) * 1000) / 1000
+      var h = toFixed(value[7])
+      var x = toFixed(value[8].replace('\n', '').replace("]]", ''))
+
+      value = {a, b, c, d, e, f, g, h, x}
+
+      results[i] = value;
+      
+    }
+
+    var n_results = results.reverse() 
+
+    dataset = n_results
+
+    var d1 = document.getElementById('dtMaterialDesignExample');
+    var d2 = document.getElementById('cookiesPopup');
+
+    for(var a = 0; a != results.length; a++) {
+      if(a % 2 === 0) {
+      d1.insertAdjacentHTML('afterbegin', '<tr style="background-color: #F8F8F8"><th>'+ n_results[a].a +'</th><th style="border-left: 2px solid #BEBEBE	">'+ n_results[a].b +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].c +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].d +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].e + '</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].f +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].g+'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].h +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].x +'</th></tr>');
+      }
+      else {
+      d1.insertAdjacentHTML('afterbegin', '<tr><th>'+ n_results[a].a +'</th><th style="border-left: 2px solid #BEBEBE	">'+ n_results[a].b +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].c +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].d +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].e + '</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].f +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].g+'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].h +'</th><th style="border-left: 2px solid #BEBEBE">'+ n_results[a].x +'</th></tr>');
+      }
+  }
+
+    d2.insertAdjacentHTML('beforeend', '<div class="insert_datas" id="insert-dts" style="display:none" ><tr><th><input placeholder="insert" id="input1"></input></th><th><input placeholder="insert" id="input2"></input></th><th><input placeholder="insert" id="input3"></input></th><th><input placeholder="insert" id="input4"></input></th><th><input placeholder="insert" id="input5"></input></th><th><input placeholder="insert" id="input6"></input></th><th><input placeholder="insert" id="input7"></input></th><th><input placeholder="insert" id="input8"></input></th></tr></div>');
+  }
+
+  function goto_result() {
+
+    if(document.getElementById('n_line').value == "") {
+      alert('fill all the input box at the bottom of the page to access to the next step');
+      return
+    }
+
+    console.log("IGSHGSJHGSJHSGJSHGSJHSGSGJSGHSJHSGJSGHSJHSG")
+    console.log(dataset)
+
+
+    document.getElementById('Tab').style.filter = "blur(2px)"
+    document.getElementById('pass').value = "a"
+    document.getElementById('Loader').style = ""
+
+    window.document.getElementById("ZOUZOU").click()
+  }
+
+</script>
+
+<body  onload="open_dataset()">
+  <div class="info">  
+  <p class="instruction">
+        Dataset:
+        </p>
+        <h3>{{ value }}<h3>
+        <p id="dataset_name" class="ds_name"></p>
+      </div>
+        <div class="choice">
+          
+          <div class="loader" id="Loader" style="display:none">
+            <div class="father">
+                <div class="one"></div>
+            </div>
+  
+            <div class="two"></div>
+            <div class="three"></div>
+  
+            <div class="mother">
+                <div class="num-for"></div>
+            </div>
+        </div>
+
+          <a  id="btnAttachment" href="/" class="button1">← go back</a>
+
+          <a action="{{ url_for('result') }}" method="post" onclick="goto_result()" id="btnAttachment" class="button1">continue →</a>
+        </div>
+
+      <div class="tab" id="Tab">
+
+        <form action="{{ url_for('result') }}" method="post">
+          <input type="text" id="namer" name="projectFilepath" style="display:none";>
+          <input type="submit" id="ZOUZOU" style="display:none";>
+          <input type="text" id="n_line" name="New_Line"; style="display:none";> 
+          <input type="submit" id="ZOUZOU2" style="display:none";>
+          <input type="text" id="TAB" name="tab"; style="display:none";> 
+          <input type="submit" id="ZOUZOU3" style="display:none";>
+          <input type="text" id="pass" name="Pass"; style="display:none";> 
+          <input type="submit" id="ZOUZOU4" style="display:none";>
+        </form>
+
+        <table id="dtMaterialDesignExample" class="table" cellspacing="0" style="width:100%">
+          <thead>
+              <tr style="background-color: #F8F8F8">
+                  <th class="th-sm" title="Number of times pregnant">Number of times pregnant</th>
+                  <th class="th-sm2" title="Plasma glucose concentration a 2 hours in an oral glucose tolerance test">Plasma glucose concentration</th>
+                  <th class="th-sm3" title="Diastolic blood pressure (mm Hg)">Blood pressure (mm Hg)</th>
+                  <th class="th-sm4" title="Triceps skin fold thickness (mm)">Triceps skin fold thickness (mm)</th>
+                  <th class="th-sm5" title="2-Hour serum insulin (mu U/ml)">2-Hour insulin (mu U/ml)</th>
+                  <th class="th-sm6" title="Body mass index (weight in kg/(height in m)^2)">Body mass index (weight in kg/(height in m)^2)</th>
+                  <th class="th-sm7" title="Diabetes pedigree function">Diabetes pedigree func</th>
+                  <th class="th-sm8" title="Age (years)">Age (year)</th>
+                  <th class="th-sm9" title="Class variable (0 or 1)">Class variable (0 or 1)</th>
+              </tr>
+          </thead>
+      </table>
+
+      <div class="cookiesContent" id="cookiesPopup" style="display:none">
+        <button class="close">✖</button>
+        <img src="https://media-exp1.licdn.com/dms/image/C4D0BAQHJEq2L50jGbw/company-logo_200_200/0?e=2159024400&v=beta&t=UVl_8wMiJfVcGYIoY_coy44taEGBK9SRGNMP-An_wOA" alt="cookies-img" />
+        <p>Enter your datas in the same order as above :</p>
+      </div>
+
+        <div class="choice2">
+          <a class="button2" id="insert_ln" onclick="insert_line()">insert line</a>
+          <a class="button2" id="save_ln" onclick="save_line()" style="display:none">save line</a>
+          <a class="button2" id="delete_ln" onclick="delete_line()" style="display:none">delete line</a>
+          <a class="button2" id="save_dt" id="sv_file" onclick="save_file()" style="display:none">save dataset</a>
+        </div>
+
+        <h3 style="display:none" id="dataset">{{ value2 }}<h3></h3>
+        </div>
+    <div class="show-data" >
+    </div>
+    </div>
+    <br>
+</body>
+</html>
+
+<style>
+
+  body {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    
+   }
+   
+#Tab {
+  filter: blur(0px);
+}
+
+.table{
+  position: relative;
+}
+
+   h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
+   }
+
+
+input {
+  border-color: grey;
+  margin-left: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.cookiesContent {
+  margin-left: auto;
+    margin-right: auto;
+    table-layout: fixed;
+    border-collapse: collapse;
+  width: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f5f5f5;
+  color: #000;
+  text-align: center;
+  border-radius: 20px;
+  padding: 30px 30px 70px;
+}
+
+#Loader {
+  margin-right: 200px;
+}
+
+.loader {
+  z-index: 2;
+  width: 55vw;
+  height: 40vw;
+  display: flex;
+  position:absolute;
+  justify-content: center;
+  align-items: center;
+  animation: move 17s ease-out 1s infinite;
+  overflow: hidden;
+}
+
+.one,
+.two,
+.three,
+.num-for {
+  width: 1em;
+  height: 1em;
+  background-color: black;
+  border-radius: 100px;
+}
+
+.two {
+  position: relative;
+  top: 1.5em;
+  left: .5em;
+}
+
+.three {
+  position: relative;
+  top: -1.5em;
+  left: -.5em;
+}
+
+@keyframes move {
+  0% {
+      transform: rotate(0);
+  }
+  100% {
+      transform: rotate(11520deg);
+  }
+}
+
+.cookiesContent button.close {
+    width: 30px;
+    font-size: 20px;
+    color: #c0c5cb;
+    align-self: flex-end;
+    background-color: transparent;
+    border: none;
+    margin-bottom: 10px;
+  }
+  .cookiesContent img {
+    width: 82px;
+    margin-bottom: 15px;
+  }
+  .cookiesContent p {
+    margin-bottom: 40px;
+    font-size: 18px;
+  }
+  .cookiesContent button.accept {
+    background-color: #ed6755;
+    border: none;
+    border-radius: 5px;
+    width: 200px;
+    padding: 14px;
+    font-size: 16px;
+    color: white;
+    box-shadow: 0px 6px 18px -5px rgba(237, 103, 85, 1);
+  }
+
+
+
+   input{
+     width: 70px;
+   } 
+   body {
+     height: 100vh;
+     margin: 0;
+     padding: 0;
+     display: block;
+     place-items: center;
+   }
+
+.ds_name{
+  text-align: center;
+}
+
+#clicked{
+    background-color: black;
+}
+
+.instruction{
+    text-align: center;
+    font-size: x-large;
+}
+
+.info{
+  vertical-align: middle;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 20%;
+  position: relative;
+  margin: auto;
+  color: black;
+  border-radius: 25px;
+  background-color:white ;
+}
+
+.button1{
+    border-radius: 10px;
+    padding: 16px 42px;
+    box-shadow: 0px 0px 12px -2px rgba(0,0,0,0.5);
+    line-height: 1.25;
+    background: #FC6E51;
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    letter-spacing: .08em;
+    transition: background-color .6s ease;
+    overflow: hidden;
+    margin-right: 420px;
+  
+  }
+  
+  .button1:hover {
+    background-color: #c45742 ;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .button1:active {
+    background-color:  #994534;
+    color: white;
+    text-decoration: none;
+    transform: scale(0.98); 
+  }
+  
+  .choice {
+    margin-left: 22.5%;
+    text-align: center;
+    line-height: 80px;
+    position:relative;
+  }
+
+  button{
+    border-radius: 10px;
+    padding: 16px 42px;
+    box-shadow: 0px 0px 12px -2px rgba(0,0,0,0.5);
+    line-height: 1.25;
+    background: #FC6E51;
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    letter-spacing: .08em;
+    transition: background-color .6s ease;
+    overflow: hidden;
+    margin-right: 420px;
+  
+  }
+  
+  button:hover {
+    background-color: #c45742 ;
+    text-decoration: none;
+    color: white;
+  }
+  
+  button:active {
+    background-color:  #994534;
+    text-decoration: none;
+    color: white;
+    transform: scale(0.98); 
+  }
+
+  .option{
+    text-align: center;
+    line-height: 20px;
+    position:relative;
+  }
+
+  .insert_datas{
+    text-align: center;
+    line-height: 20px;
+    position:relative;
+  }
+
+  .choice2 {
+    margin-left: 8.5%;
+    text-align: center;
+    line-height: 80px;
+    position:relative;
+  }
+    .button2{
+      border-radius: 10px;
+      padding: 16px 42px;
+      box-shadow: 0px 0px 12px -2px rgba(0,0,0,0.5);
+      line-height: 1.25;
+      background: #FC6E51;
+      text-decoration: none;
+      color: white;
+      font-size: 16px;
+      letter-spacing: .08em;
+      transition: background-color .6s ease;
+      overflow: hidden;
+      margin-right: 120px;
+    
+    }
+    
+    .button2:hover {
+      background-color: #c45742;
+      text-decoration: none;
+      color: white;
+    }
+    
+    .button2:active {
+      background-color:  #994534;
+      text-decoration: none;
+      color: white;
+      transform: scale(0.98); 
+    }
+
+    th-sm1:hover:after {
+      position: absolute;
+      content: attr(title);
+      display: inline-block;
+      left: 0px;
+      top: 0px;
+      padding: 5px;
+      background-color: black;
+      color: white;
+  }
+  th-sm2:hover:after {
+    position: absolute;
+    content: attr(title);
+    display: inline-block;
+    left: 0px;
+    top: 0px;
+    padding: 5px;
+    background-color: black;
+    color: white;
+}
+
+th-sm3:hover:after {
+  position: absolute;
+  content: attr(title);
+  display: inline-block;
+  left: 0px;
+  top: 0px;
+  padding: 5px;
+  background-color: black;
+  color: white;
+}
+
+th-sm4:hover:after {
+  position: absolute;
+  content: attr(title);
+  display: inline-block;
+  left: 0px;
+  top: 0px;
+  padding: 5px;
+  background-color: black;
+  color: white;
+}
+th-sm5:hover:after {
+  position: absolute;
+  content: attr(title);
+  display: inline-block;
+  left: 0px;
+  top: 0px;
+  padding: 5px;
+  background-color: black;
+  color: white;
+}
+th-sm6:hover:after {
+  position: absolute;
+  content: attr(title);
+  display: inline-block;
+  left: 0px;
+  top: 0px;
+  padding: 5px;
+  background-color: black;
+  color: white;
+}
+th-sm7:hover:after {
+  position: absolute;
+  content: attr(title);
+  display: inline-block;
+  left: 0px;
+  top: 0px;
+  padding: 5px;
+  background-color: black;
+  color: white;
+}
+th-sm8:hover:after {
+  position: absolute;
+  content: attr(title);
+  display: inline-block;
+  left: 0px;
+  top: 0px;
+  padding: 5px;
+  background-color: black;
+  color: white;
+}
+th-sm9:hover:after {
+  position: absolute;
+  content: attr(title);
+  display: inline-block;
+  left: 0px;
+  top: 0px;
+  padding: 5px;
+  background-color: black;
+  color: white;
+}
+
+</style>

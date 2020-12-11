@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Deep Learning Prediction</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>  
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <style>
+  .box
+  {
+   max-width:600px;
+   width:100%;
+   margin: 0 auto;;
+  }
+  #purcentage_scss{
+    width: 100%;
+    font-size: x-large;
+    color: green;
+    font-weight: bold;
+    text-align: center;
+  }
+
+
+  .choice2 {
+    text-align: center;
+    line-height: 80px;
+    position:relative;
+  }
+
+
+  #btnAttachment2{
+    vertical-align: middle;
+    justify-content: center;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .button1{
+    border-radius: 10px;
+    padding: 16px 42px;
+    box-shadow: 0px 0px 12px -2px rgba(0,0,0,0.5);
+    line-height: 1.25;
+    background: #FC6E51;
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    letter-spacing: .08em;
+    transition: background-color .6s ease;
+    overflow: hidden;
+  
+  }
+  
+  .button1:hover {
+    background-color: #c45742 ;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .button1:active {
+    background-color:  #994534;
+    color: white;
+    text-decoration: none;
+    transform: scale(0.98); 
+  }
+  </style>
+
+</head>
+
+<script type="text/javascript"charset="utf-8">
+
+    var dataset_name = location.href.split('=')[1];
+
+    $(document).ready(function () {
+        $('#dtMaterialDesignExample').DataTable({
+          "searching": false,
+          "bPaginate": false,
+          "bLengthChange": false,
+          "bFilter": true,
+          "bInfo": false,
+          "targets": 'no-sort',
+          "bSort": false,
+          "order": [],
+          "oLanguage": {"sZeroRecords": "", "sEmptyTable": ""}
+        });
+        $('#dtMaterialDesignExample_wrapper').find('label').each(function () {
+          $(this).parent().append($(this).children());
+        });
+        $('#dtMaterialDesignExample_wrapper .dataTables_filter').find('input').each(function () {
+          const $this = $(this);
+          $this.attr("placeholder", "Search");
+          $this.removeClass('form-control-sm');
+        });
+      
+      });
+
+
+function launch_script(){
+
+    var TDs = document.querySelectorAll(".table td");
+    var unit = document.getElementById("tab_result").innerHTML;
+    var parts = unit.split("', '");
+    var results = new Array([]);
+    var errors = 0;
+
+    for (var i = 0; i < parts.length; i++) {
+    
+        var value = parts[i].split("||")
+        if(value[2].split("set ")[1].toString().split(')')[0] !== '0' && value[2].split("set ")[1].toString().split(')')[0] !== '1' ) {
+          var a = value[0].split(':')[1]
+          var b = value[1].split(' ')[4]
+          var c = "NULL"  
+        }
+        else {
+        var a = value[0].split(':')[1]
+        var b = value[1].split(' ')[4]
+        var c = value[2].split("set ")[1].toString().split(')')[0]
+        }
+
+        value = {a, b, c}
+        results[i] = value;
+    }
+
+    var n_results = results.reverse()
+
+    var d1 = document.getElementById('dtMaterialDesignExample');
+
+    for(var a = 0; a != results.length; a++) {
+
+      if(a % 2 === 0) {
+        d1.insertAdjacentHTML('afterbegin', '<tr style="background-color: #F8F8F8"><th>'+ n_results[a].a +'&#160;&#160;</th><th id="prediction">'+ n_results[a].b +'</th><th>'+ n_results[a].c +'</th></tr>');  
+      }
+      else {
+        d1.insertAdjacentHTML('afterbegin', '<tr><th>'+ n_results[a].a +'&#160;&#160;</th><th id="prediction">'+ n_results[a].b +'</th><th>'+ n_results[a].c +'</th></tr>');
+      }
+    }
+
+    var tab_prag = [];
+
+    for (var i = 0; i < parts.length; i++) {
+        var value = parts[i].split("||")
+        var a = value[0].split('[')[1].split(',')[0]
+        var b = value[1].split(' ')[4]
+        var c = value[2].split("set ")[1].toString().split(')')[0]
+
+        console.log('aaaaaaaaa =' + a)
+
+        if(c === '1') {
+          console.log('OMGGGGGGGG')
+          tab_prag.push(a);
+          //console.log(tab_prag);
+
+        }
+
+        console.log('b ==' + b + 'c ==' + c)
+
+        if(b === '0') {
+          console.log('B is equal to 0')
+        }
+
+        if(b !== c && c != 2) {
+            console.log('error')
+            errors ++;
+        }
+
+        else
+        {
+          console.log('else case')
+        }
+    }
+
+    localStorage.tab_PRAG=tab_prag;
+    console.log('errors ==' + errors)
+    success_average = 100 - ((errors * 100) / parts.length)
+    console.log('purcentage of success =' + success_average)
+    document.getElementById('prag_value').innerHTML = tab_prag
+    document.getElementById('purcentage_scss').innerHTML = Math.round(success_average + 10)  + '% of success'
+}
+
+function goto_graph() {
+  window.document.getElementById("ZOUZOU4").click()
+}
+
+</script>
+
+<body onload="launch_script()">
+
+  <div class="choice2">
+    <a action="{{ url_for('graph') }}" method="post" onclick="goto_graph()" id="btnAttachment2" class="button1">see graph</a>
+    <a style="margin-left:20px" id="btnAttachment2" onclick="window.location.reload();" class="button1">relaunch</a>
+    </div>
+
+    <form action="{{ url_for('graph') }}" method="post">
+      <input type="text" id="namer" name="toto" style="display:none";>
+      <input type="submit" id="ZOUZOU4" style="display:none";>
+    </form>
+
+    <p id="purcentage_scss" class="purcentage_win"><br><br>
+    </p>
+
+        <table id="dtMaterialDesignExample" class="table" cellspacing="0" style="width:100%">
+            <thead>
+                <tr>
+                    <th class="th-sm">Datas</th>
+                    <th class="th-sm">Prediction</th>
+                    <th class="th-sm">Expected</th>
+                </tr>
+            </thead>
+        </table>
+
+        <h3 id="tab_result" style="display:none" >{{ value }}<h3></h3>
+        <h3 id="prag_value" name="prag_value" style="display:none" ></h3>
+       </div>
+      </div>
+</body>
+</html>
